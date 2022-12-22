@@ -1,0 +1,4 @@
+01-add-junit-dependency.patch
+02-propertyutils-compatibility.patch
+03-maven-plugin-testing-compatibility.patch
+06-ignore-jmh-benchmarks.patch

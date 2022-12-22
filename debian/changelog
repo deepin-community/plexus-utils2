@@ -1,0 +1,120 @@
+plexus-utils2 (3.3.0-1) unstable; urgency=medium
+
+  * Team upload.
+  * New upstream release
+  * Standards-Version updated to 4.5.0
+
+ -- Emmanuel Bourg <ebourg@apache.org>  Mon, 27 Jan 2020 17:17:00 +0100
+
+plexus-utils2 (3.2.1-1) unstable; urgency=medium
+
+  * Team upload.
+  * New upstream release
+    - Refreshed the patches
+    - Disabled the performance tests
+  * Standards-Version updated to 4.4.0
+
+ -- Emmanuel Bourg <ebourg@apache.org>  Fri, 12 Jul 2019 08:51:10 +0200
+
+plexus-utils2 (3.1.1-1) unstable; urgency=medium
+
+  * New upstream release
+    - Refreshed the patches
+    - Build depend on junit4 instead of junit
+  * Standards-Version updated to 4.3.0
+
+ -- Emmanuel Bourg <ebourg@apache.org>  Fri, 28 Dec 2018 16:02:28 +0100
+
+plexus-utils2 (3.1.0-4) unstable; urgency=medium
+
+  * Team upload.
+  * Fixed a regression affecting FileUtils.copyFile() when the source file
+    is a symbolic link
+
+ -- Emmanuel Bourg <ebourg@apache.org>  Mon, 26 Nov 2018 09:18:05 +0100
+
+plexus-utils2 (3.1.0-3) unstable; urgency=medium
+
+  * Team upload.
+  * Added a Provides libplexus-utils-java-doc
+
+ -- Emmanuel Bourg <ebourg@apache.org>  Fri, 23 Nov 2018 00:49:19 +0100
+
+plexus-utils2 (3.1.0-2) unstable; urgency=medium
+
+  * Team upload.
+  * Use a versioned Provides for libplexus-utils-java (Closes: #914177)
+
+ -- Emmanuel Bourg <ebourg@apache.org>  Thu, 22 Nov 2018 13:07:43 +0100
+
+plexus-utils2 (3.1.0-1) unstable; urgency=medium
+
+  * Team upload.
+  * New upstream release
+    - Refreshed the patches
+    - Fixed a test failure in CommandlineTest with Maven 3.5.4 or later
+  * Breaks/Replaces libplexus-utils-java and install the same artifacts
+  * Standards-Version updated to 4.2.1
+  * Switch to debhelper level 11
+  * Use salsa.debian.org Vcs-* URLs
+  * Removed Damien Raude-Morvan from the uploaders (Closes: #889436)
+
+ -- Emmanuel Bourg <ebourg@apache.org>  Mon, 19 Nov 2018 12:36:19 +0100
+
+plexus-utils2 (3.0.24-3) unstable; urgency=medium
+
+  * Team upload.
+  * Fixed the build failure caused by maven-plugin-testing 2.x (Closes: #869005)
+  * Standards-Version updated to 4.0.0
+
+ -- Emmanuel Bourg <ebourg@apache.org>  Thu, 20 Jul 2017 09:54:02 +0200
+
+plexus-utils2 (3.0.24-2) unstable; urgency=medium
+
+  * Team upload.
+  * Restored the backward compatibility of PropertyUtils by removing
+    the IOException on the loadProperties methods (Closes: #863223)
+
+ -- Emmanuel Bourg <ebourg@apache.org>  Wed, 24 May 2017 00:29:20 +0200
+
+plexus-utils2 (3.0.24-1) unstable; urgency=medium
+
+  * Team upload.
+  * New upstream release
+    - Refreshed the patch
+  * Standards-Version updated to 3.9.8
+  * Use a secure Vcs-Git URL
+  * Switch to debhelper level 10
+  * Fixed the get-orig-source target in debian/rules
+
+ -- Emmanuel Bourg <ebourg@apache.org>  Thu, 18 May 2017 17:37:58 +0200
+
+plexus-utils2 (3.0.22-1) unstable; urgency=medium
+
+  * Team upload.
+  * New upstream release
+    - New build dependency on libmaven-plugin-testing-java
+  * Build with maven-debian-helper instead of maven-ant-helper
+  * Replaced the obsolete codehaus URLs
+  * Exclude the JIRA issues exported as JSON files from the upstream tarball
+
+ -- Emmanuel Bourg <ebourg@apache.org>  Thu, 19 Nov 2015 14:49:44 +0100
+
+plexus-utils2 (3.0.15-1) unstable; urgency=medium
+
+  * Team upload.
+  * New upstream release
+  * debian/control:
+    - Standards-Version updated to 3.9.6 (no changes)
+    - Use canonical URLs for the Vcs-* fields
+  * Switch to debhelper level 9
+  * debian/copyright: Merged the duplicate Copyright fields
+  * debian/watch: Watch the release tags on Github
+
+ -- Emmanuel Bourg <ebourg@apache.org>  Wed, 08 Oct 2014 12:27:45 +0200
+
+plexus-utils2 (2.0.5-1) unstable; urgency=low
+
+  * Initial release (Closes: #648774).
+
+ -- Damien Raude-Morvan <drazzib@debian.org>  Mon, 28 Nov 2011 22:41:46 +0100

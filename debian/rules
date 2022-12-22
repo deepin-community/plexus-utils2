@@ -1,0 +1,14 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@
+
+override_dh_auto_install:
+	# Install the artifacts installed by libplexus-utils-java
+	# (don't use a relocation pom for maximum compatibility)
+	mh_installpom -plibplexus-utils2-java --set-version=debian pom.xml
+	rm -Rf debian/libplexus-utils2-java/usr/share/maven-repo/org/codehaus/plexus/plexus-utils/2.x
+	dh_link -plibplexus-utils2-java usr/share/java/plexus-utils2.jar usr/share/java/plexus-utils.jar
+	dh_link -plibplexus-utils2-java usr/share/java/plexus-utils2.jar usr/share/maven-repo/org/codehaus/plexus/plexus-utils/debian/plexus-utils-debian.jar
+
+	dh_auto_install

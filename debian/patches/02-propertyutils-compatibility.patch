@@ -1,0 +1,73 @@
+Description: Restores the backward compatibility of PropertyUtils
+ by removing the IOException on the loadProperties methods
+Author: Emmanuel Bourg <ebourg@apache.org>
+Forwarded: not-needed
+--- a/src/main/java/org/codehaus/plexus/util/PropertyUtils.java
++++ b/src/main/java/org/codehaus/plexus/util/PropertyUtils.java
+@@ -34,29 +34,44 @@
+ {
+ 
+     public static Properties loadProperties( final URL url )
+-        throws IOException
+     {
+         if ( url == null )
+         {
+             throw new NullPointerException( "url" );
+         }
+ 
+-        return loadProperties( url.openStream() );
++        try
++        {
++            return loadProperties( url.openStream() );
++        }
++        catch ( IOException e )
++        {
++            // ignore
++        }
++
++        return null;
+     }
+ 
+     public static Properties loadProperties( final File file )
+-        throws IOException
+     {
+         if ( file == null )
+         {
+             throw new NullPointerException( "file" );
+         }
+ 
+-        return loadProperties( new FileInputStream( file ) );
++        try
++        {
++            return loadProperties( new FileInputStream( file ) );
++        }
++        catch ( IOException e )
++        {
++            // ignore
++        }
++
++        return null;
+     }
+ 
+     public static Properties loadProperties( final InputStream is )
+-        throws IOException
+     {
+         InputStream in = is;
+         try
+@@ -73,10 +88,16 @@
+ 
+             return properties;
+         }
++        catch ( IOException e )
++        {
++            // ignore
++        }
+         finally
+         {
+             IOUtil.close( in );
+         }
++
++        return null;
+     }
+ 
+ }
