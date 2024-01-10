@@ -3,7 +3,7 @@ Author: Emmanuel Bourg <ebourg@apache.org>
 Forwarded: no
 --- a/pom.xml
 +++ b/pom.xml
-@@ -70,6 +70,12 @@
+@@ -80,6 +80,12 @@
        <scope>test</scope>
      </dependency>
      <dependency>

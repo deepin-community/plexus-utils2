@@ -1,5 +1,7 @@
 package org.codehaus.plexus.util;
 
+import java.util.Objects;
+
 /*
  * Copyright The Codehaus Foundation.
  *
@@ -18,17 +20,16 @@ package org.codehaus.plexus.util;
 
 import java.util.Properties;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
 
 /**
  * Static methods to create Properties loaded from various sources.
  *
  * @author <a href="mailto:jason@maven.org">Jason van Zyl</a>
  * @author <a href="mailto:mmaczka@interia.pl">Michal Maczka</a>
- * @version $Id$
  */
 public class PropertyUtils
 {
@@ -36,47 +37,30 @@ public class PropertyUtils
     public static Properties loadProperties( final URL url )
         throws IOException
     {
-        if ( url == null )
-        {
-            throw new NullPointerException( "url" );
-        }
-
-        return loadProperties( url.openStream() );
+        return loadProperties( Objects.requireNonNull( url, "url" ).openStream() );
     }
 
     public static Properties loadProperties( final File file )
         throws IOException
     {
-        if ( file == null )
-        {
-            throw new NullPointerException( "file" );
-        }
-
-        return loadProperties( new FileInputStream( file ) );
+        return loadProperties( Files.newInputStream( Objects.requireNonNull( file, "file" ).toPath() ) );
     }
 
     public static Properties loadProperties( final InputStream is )
         throws IOException
     {
-        InputStream in = is;
-        try
+        final Properties properties = new Properties();
+        
+        // Make sure the properties stream is valid
+        if ( is != null )
         {
-            final Properties properties = new Properties();
-
-            // Make sure the properties stream is valid
-            if ( in != null )
+            try ( InputStream in = is ) 
             {
                 properties.load( in );
-                in.close();
-                in = null;
             }
+        }
 
-            return properties;
-        }
-        finally
-        {
-            IOUtil.close( in );
-        }
+        return properties;
     }
 
 }

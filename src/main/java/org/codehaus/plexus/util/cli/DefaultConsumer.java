@@ -20,12 +20,13 @@ import java.io.IOException;
 
 /**
  * @author <a href="mailto:evenisse@apache.org">Emmanuel Venisse</a>
- * @version $Id$
+ *
  */
 public class DefaultConsumer
     implements StreamConsumer
 {
 
+    @Override
     public void consumeLine( String line )
         throws IOException
     {

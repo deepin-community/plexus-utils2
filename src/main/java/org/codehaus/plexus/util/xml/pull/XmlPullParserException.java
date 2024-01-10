@@ -14,6 +14,7 @@ public class XmlPullParserException
     /**
      * @deprecated use generic getCause() method
      */
+    @Deprecated
     protected Throwable detail;
 
     protected int row = -1;
@@ -50,8 +51,9 @@ public class XmlPullParserException
 
     /**
      * @deprecated Use the generic <code>getCause()</code> method
-     * @return
+     * @return the cause
      */
+    @Deprecated
     public Throwable getDetail()
     {
         return getCause();
@@ -74,6 +76,7 @@ public class XmlPullParserException
      */
 
     // NOTE: code that prints this and detail is difficult in J2ME
+    @Override
     public void printStackTrace()
     {
         if ( getCause() == null )

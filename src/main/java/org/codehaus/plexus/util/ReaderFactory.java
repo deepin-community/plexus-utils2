@@ -17,9 +17,7 @@ package org.codehaus.plexus.util;
  */
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -27,6 +25,7 @@ import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
 
 import org.codehaus.plexus.util.xml.XmlStreamReader;
 
@@ -36,7 +35,7 @@ import org.codehaus.plexus.util.xml.XmlStreamReader;
  * @author <a href="mailto:hboutemy@codehaus.org">Herve Boutemy</a>
  * @see Charset
  * @see <a href="http://java.sun.com/j2se/1.4.2/docs/guide/intl/encoding.doc.html">Supported encodings</a>
- * @version $Id$
+ *
  * @since 1.4.3
  */
 public class ReaderFactory
@@ -154,13 +153,13 @@ public class ReaderFactory
      *
      * @param file not null file.
      * @return a reader instance for the input file using the default platform charset.
-     * @throws FileNotFoundException if any.
+     * @throws IOException if any.
      * @see Charset#defaultCharset()
      */
     public static Reader newPlatformReader( File file )
-        throws FileNotFoundException
+        throws IOException
     {
-        return new FileReader( file );
+        return Files.newBufferedReader( file.toPath() );
     }
 
     /**
@@ -199,14 +198,13 @@ public class ReaderFactory
      * @param file not null file.
      * @param encoding not null supported encoding.
      * @return a reader instance for the input file using the given encoding.
-     * @throws FileNotFoundException if any.
-     * @throws UnsupportedEncodingException if any.
+     * @throws IOException if any.
      * @see <a href="http://java.sun.com/j2se/1.4.2/docs/guide/intl/encoding.doc.html">Supported encodings</a>
      */
     public static Reader newReader( File file, String encoding )
-        throws FileNotFoundException, UnsupportedEncodingException
+        throws IOException
     {
-        return new InputStreamReader( new FileInputStream( file ), encoding );
+        return new InputStreamReader( Files.newInputStream( file.toPath() ), encoding );
     }
 
     /**
