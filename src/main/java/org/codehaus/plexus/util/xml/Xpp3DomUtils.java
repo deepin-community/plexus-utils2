@@ -19,9 +19,7 @@ package org.codehaus.plexus.util.xml;
 import org.codehaus.plexus.util.xml.pull.XmlSerializer;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 /** @author Jason van Zyl */
@@ -52,6 +50,14 @@ public class Xpp3DomUtils
      * @since 3.0.22
      */
     public static final String ID_COMBINATION_MODE_ATTRIBUTE = "combine.id";
+    
+    /**
+     * In case of complex XML structures, combining can be done based on keys.
+     * This is a comma separated list of attribute names.
+     * 
+     * @since 3.4.0
+     */
+    public static final String KEYS_COMBINATION_MODE_ATTRIBUTE = "combine.keys";
 
     /**
      * This default mode for combining a DOM node during merge means that where element names match, the process will
@@ -105,6 +111,8 @@ public class Xpp3DomUtils
      *   <li> Iterate through the recessive children, and:
      *     <ol type="i">
      *     <li> if 'combine.id' is set and there is a corresponding dominant child (matched by value of 'combine.id'),
+     *          merge the two.</li>
+     *     <li> if 'combine.keys' is set and there is a corresponding dominant child (matched by value of key elements),
      *          merge the two.</li>
      *     <li> if mergeChildren == true and there is a corresponding dominant child (matched by element name),
      *          merge the two.</li>
@@ -163,6 +171,8 @@ public class Xpp3DomUtils
                 }
             }
 
+            final String keysValue = recessive.getAttribute( KEYS_COMBINATION_MODE_ATTRIBUTE );
+
             Xpp3Dom[] children = recessive.getChildren();
             for ( Xpp3Dom recessiveChild : children )
             {
@@ -180,6 +190,32 @@ public class Xpp3DomUtils
                             mergeChildren = true;
                         }
                     }
+                }
+                else if ( isNotEmpty( keysValue ) ) 
+                {
+                    String[] keys = keysValue.split( "," );
+                    Map<String, String> recessiveKeyValues = new HashMap<>( keys.length );
+                    for ( String key : keys )
+                    {
+                        recessiveKeyValues.put( key, recessiveChild.getAttribute( key ) );
+                    }
+                    
+                    for ( Xpp3Dom dominantChild : dominant.getChildren() )
+                    {
+                        Map<String, String> dominantKeyValues = new HashMap<>( keys.length );
+                        for ( String key : keys )
+                        {
+                            dominantKeyValues.put( key, dominantChild.getAttribute( key ) );
+                        }
+
+                        if ( recessiveKeyValues.equals( dominantKeyValues ) )
+                        {
+                            childDom = dominantChild;
+                            // we have a match, so don't append but merge
+                            mergeChildren = true;
+                        }
+                    }
+                    
                 }
                 else
                 {
@@ -207,6 +243,7 @@ public class Xpp3DomUtils
      * @param recessive The recessive DOM, which will be merged into the dominant DOM
      * @param childMergeOverride Overrides attribute flags to force merging or appending of child elements into the
      *            dominant DOM
+     * @return merged DOM
      */
     public static Xpp3Dom mergeXpp3Dom( Xpp3Dom dominant, Xpp3Dom recessive, Boolean childMergeOverride )
     {
@@ -226,6 +263,7 @@ public class Xpp3DomUtils
      * @see #SELF_COMBINATION_MODE_ATTRIBUTE
      * @param dominant The dominant DOM into which the recessive value/attributes/children will be merged
      * @param recessive The recessive DOM, which will be merged into the dominant DOM
+     * @return merged DOM
      */
     public static Xpp3Dom mergeXpp3Dom( Xpp3Dom dominant, Xpp3Dom recessive )
     {

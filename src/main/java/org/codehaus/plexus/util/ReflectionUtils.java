@@ -32,7 +32,6 @@ import java.util.Arrays;
  * @author <a href="mailto:michal@codehaus.org">Michal Maczka</a>
  * @author <a href="mailto:jesse@codehaus.org">Jesse McConnell</a>
  * @author <a href="mailto:trygvis@inamo.no">Trygve Laugst&oslash;l</a>
- * @version $Id$
  */
 public final class ReflectionUtils
 {
@@ -63,7 +62,7 @@ public final class ReflectionUtils
 
     public static List<Field> getFieldsIncludingSuperclasses( Class<?> clazz )
     {
-        List<Field> fields = new ArrayList<Field>( Arrays.asList( clazz.getDeclaredFields() ) );
+        List<Field> fields = new ArrayList<>( Arrays.asList( clazz.getDeclaredFields() ) );
 
         Class<?> superclass = clazz.getSuperclass();
 
@@ -104,13 +103,14 @@ public final class ReflectionUtils
     }
 
     /**
-     * Finds all setters in the given class and super classes.
+     * @return all setters in the given class and super classes.
+     * @param clazz the Class
      */
     public static List<Method> getSetters( Class<?> clazz )
     {
         Method[] methods = clazz.getMethods();
 
-        List<Method> list = new ArrayList<Method>();
+        List<Method> list = new ArrayList<>();
 
         for ( Method method : methods )
         {
@@ -124,7 +124,8 @@ public final class ReflectionUtils
     }
 
     /**
-     * Returns the class of the argument to the setter. Will throw an RuntimeException if the method isn't a setter.
+     * @param method the method
+     * @return the class of the argument to the setter. Will throw an RuntimeException if the method isn't a setter.
      */
     public static Class<?> getSetterType( Method method )
     {
@@ -144,10 +145,10 @@ public final class ReflectionUtils
     /**
      * attempts to set the value to the variable in the object passed in
      *
-     * @param object
-     * @param variable
-     * @param value
-     * @throws IllegalAccessException
+     * @param object see name
+     * @param variable see name
+     * @param value see name
+     * @throws IllegalAccessException if error
      */
     public static void setVariableValueInObject( Object object, String variable, Object value )
         throws IllegalAccessException
@@ -161,9 +162,11 @@ public final class ReflectionUtils
 
     /**
      * Generates a map of the fields and values on a given object, also pulls from superclasses
-     *
+     * 
+     * @param variable field name
      * @param object the object to generate the list of fields from
      * @return map containing the fields and their values
+     * @throws IllegalAccessException cannot access
      */
     public static Object getValueIncludingSuperclasses( String variable, Object object )
         throws IllegalAccessException
@@ -181,11 +184,12 @@ public final class ReflectionUtils
      *
      * @param object the object to generate the list of fields from
      * @return map containing the fields and their values
+     * @throws IllegalAccessException cannot access
      */
     public static Map<String, Object> getVariablesAndValuesIncludingSuperclasses( Object object )
         throws IllegalAccessException
     {
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
 
         gatherVariablesAndValuesIncludingSuperclasses( object, map );
 
@@ -213,6 +217,14 @@ public final class ReflectionUtils
     {
 
         Class<?> clazz = object.getClass();
+
+        if ( Float.parseFloat( System.getProperty( "java.specification.version" ) ) >= 11
+            && Class.class.getCanonicalName().equals( clazz.getCanonicalName() ) )
+        {
+            // Updating Class fields accessibility is forbidden on Java 16 (and throws warning from version 11)
+            // No concrete use case to modify accessibility at this level
+            return;
+        }
 
         Field[] fields = clazz.getDeclaredFields();
 

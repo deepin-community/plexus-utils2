@@ -60,10 +60,6 @@ import org.codehaus.plexus.util.io.URLInputStreamFacade;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -72,7 +68,10 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.net.URL;
-import java.nio.channels.FileChannel;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.security.SecureRandom;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -83,7 +82,7 @@ import java.util.Random;
 /**
  * <p>This class provides basic facilities for manipulating files and file paths.</p>
  * 
- * <h3>Path-related methods</h3>
+ * <b>Path-related methods</b>
  * 
  * <p>Methods exist to retrieve the components of a typical file path. For example
  * <code>/www/hosted/mysite/index.html</code>, can be broken into:
@@ -96,7 +95,7 @@ import java.util.Random;
  * <p>There are also methods to {@link #catPath concatenate two paths}, {@link #resolveFile resolve a path relative to a
  * File} and {@link #normalize} a path.</p>
 
- * <h3>File-related methods</h3>
+ * <b>File-related methods</b>
  * 
  * <p>There are methods to create a {@link #toFile File from a URL}, copy a {@link #copyFileToDirectory File to a
  * directory}, copy a {@link #copyFile File to another File}, copy a {@link #copyURLToFile URL's contents to a File}, as
@@ -113,7 +112,7 @@ import java.util.Random;
  * @author <a href="mailto:Christoph.Reck@dlr.de">Christoph.Reck</a>
  * @author <a href="mailto:peter@codehaus.org">Peter Donald</a>
  * @author <a href="mailto:jefft@codehaus.org">Jeff Turner</a>
- * @version $Id$
+ *
  */
 public class FileUtils
 {
@@ -133,14 +132,9 @@ public class FileUtils
     public static final int ONE_GB = ONE_KB * ONE_MB;
 
     /**
-     * The file copy buffer size (30 MB)
-     */
-    private static final long FILE_COPY_BUFFER_SIZE = ONE_MB * 30;
-
-    /**
      * The vm file separator
      */
-    public static String FS = System.getProperty( "file.separator" );
+    public static String FS = File.separator;
 
     /**
      * Non-valid Characters for naming files, folders under Windows: <code>":", "*", "?", "\"", "<", ">", "|"</code>
@@ -363,35 +357,31 @@ public class FileUtils
     {
         StringBuilder buf = new StringBuilder();
 
-        Reader reader = null;
-
-        try
+        try ( Reader reader = getInputStreamReader( file, encoding ) )
         {
-            if ( encoding != null )
-            {
-                reader = new InputStreamReader( new FileInputStream( file ), encoding );
-            }
-            else
-            {
-                reader = new InputStreamReader( new FileInputStream( file ) );
-            }
             int count;
             char[] b = new char[512];
             while ( ( count = reader.read( b ) ) >= 0 ) // blocking read
             {
                 buf.append( b, 0, count );
             }
-            reader.close();
-            reader = null;
-        }
-        finally
-        {
-            IOUtil.close( reader );
         }
 
         return buf.toString();
     }
 
+    private static InputStreamReader getInputStreamReader( File file, String encoding ) throws IOException
+    {
+        if ( encoding != null )
+        {
+            return new InputStreamReader( Files.newInputStream( file.toPath() ), encoding );
+        }
+        else
+        {
+            return new InputStreamReader( Files.newInputStream( file.toPath() ) );
+        }
+    }
+    
     /**
      * Appends data to a file. The file will be created if it does not exist. Note: the data is written with platform
      * encoding
@@ -399,6 +389,8 @@ public class FileUtils
      * @param fileName The path of the file to write.
      * @param data The content to write to the file.
      * @throws IOException if any
+     * @deprecated use {@code java.nio.files.Files.write(filename, data.getBytes(encoding),
+     *     StandardOpenOption.APPEND, StandardOpenOption.CREATE)}
      */
     public static void fileAppend( String fileName, String data )
         throws IOException
@@ -413,14 +405,15 @@ public class FileUtils
      * @param encoding The encoding of the file.
      * @param data The content to write to the file.
      * @throws IOException if any
+     * @deprecated use {@code java.nio.files.Files.write(filename, data.getBytes(encoding),
+     *     StandardOpenOption.APPEND, StandardOpenOption.CREATE)}
      */
     public static void fileAppend( String fileName, String encoding, String data )
         throws IOException
     {
-        FileOutputStream out = null;
-        try
+        try ( OutputStream out = Files.newOutputStream( Paths.get(fileName),
+                StandardOpenOption.APPEND, StandardOpenOption.CREATE ) )
         {
-            out = new FileOutputStream( fileName, true );
             if ( encoding != null )
             {
                 out.write( data.getBytes( encoding ) );
@@ -429,12 +422,6 @@ public class FileUtils
             {
                 out.write( data.getBytes() );
             }
-            out.close();
-            out = null;
-        }
-        finally
-        {
-            IOUtil.close( out );
         }
     }
 
@@ -494,25 +481,22 @@ public class FileUtils
     public static void fileWrite( File file, String encoding, String data )
         throws IOException
     {
-        Writer writer = null;
-        try
+        try ( Writer writer = getOutputStreamWriter( file, encoding ) )
         {
-            OutputStream out = new FileOutputStream( file );
-            if ( encoding != null )
-            {
-                writer = new OutputStreamWriter( out, encoding );
-            }
-            else
-            {
-                writer = new OutputStreamWriter( out );
-            }
             writer.write( data );
-            writer.close();
-            writer = null;
         }
-        finally
+    }
+    
+    private static OutputStreamWriter getOutputStreamWriter( File file, String encoding ) throws IOException
+    {
+        OutputStream out = Files.newOutputStream( file.toPath() );
+        if ( encoding != null )
         {
-            IOUtil.close( writer );
+            return new OutputStreamWriter( out, encoding );
+        }
+        else
+        {
+            return new OutputStreamWriter( out );
         }
     }
 
@@ -524,20 +508,13 @@ public class FileUtils
     public static void fileDelete( String fileName )
     {
         File file = new File( fileName );
-        if ( Java7Detector.isJava7() )
+        try
         {
-            try
-            {
-                NioFiles.deleteIfExists( file );
-            }
-            catch ( IOException e )
-            {
-                throw new RuntimeException( e );
-            }
+            NioFiles.deleteIfExists( file );
         }
-        else
+        catch ( IOException e )
         {
-            file.delete();
+            throw new RuntimeException( e );
         }
     }
 
@@ -653,10 +630,7 @@ public class FileUtils
         }
 
         // ok... move the Vector into the files list...
-        String[] foundFiles = new String[files.size()];
-        files.toArray( foundFiles );
-
-        return foundFiles;
+        return files.toArray( new String[0] );
     }
 
     /**
@@ -751,26 +725,12 @@ public class FileUtils
             // don't want to compare directory contents
             return false;
         }
-
-        InputStream input1 = null;
-        InputStream input2 = null;
-        boolean equals = false;
-        try
+        
+        try ( InputStream input1 = Files.newInputStream( file1.toPath() );
+              InputStream input2 = Files.newInputStream( file2.toPath() ) )
         {
-            input1 = new FileInputStream( file1 );
-            input2 = new FileInputStream( file2 );
-            equals = IOUtil.contentEquals( input1, input2 );
-            input1.close();
-            input1 = null;
-            input2.close();
-            input2 = null;
+            return IOUtil.contentEquals( input1, input2 );
         }
-        finally
-        {
-            IOUtil.close( input1 );
-            IOUtil.close( input2 );
-        }
-        return equals;
     }
 
     /**
@@ -1030,6 +990,7 @@ public class FileUtils
      * @param sourceBase The basedir used for the directory scan
      * @param dirs The getIncludedDirs from the dirscanner
      * @param destination The base dir of the output structure
+     * @throws IOException io issue
      */
     public static void mkDirs( final File sourceBase, String[] dirs, final File destination )
         throws IOException
@@ -1038,7 +999,7 @@ public class FileUtils
         {
             File src = new File( sourceBase, dir );
             File dst = new File( destination, dir );
-            if ( Java7Detector.isJava7() && NioFiles.isSymbolicLink( src ) )
+            if ( NioFiles.isSymbolicLink( src ) )
             {
                 File target = NioFiles.readSymbolicLink( src );
                 NioFiles.createSymbolicLink( dst, target );
@@ -1091,60 +1052,45 @@ public class FileUtils
     private static void doCopyFile( File source, File destination )
         throws IOException
     {
-        // offload to operating system if supported
-        if ( Java7Detector.isJava7() )
-        {
-            doCopyFileUsingNewIO( source, destination );
-        }
-        else
-        {
-            doCopyFileUsingLegacyIO( source, destination );
-        }
-    }
-
-    private static void doCopyFileUsingLegacyIO( File source, File destination )
-        throws IOException
-    {
-        FileInputStream fis = null;
-        FileOutputStream fos = null;
-        FileChannel input = null;
-        FileChannel output = null;
-        try
-        {
-            fis = new FileInputStream( source );
-            fos = new FileOutputStream( destination );
-            input = fis.getChannel();
-            output = fos.getChannel();
-            long size = input.size();
-            long pos = 0;
-            long count = 0;
-            while ( pos < size )
-            {
-                count = size - pos > FILE_COPY_BUFFER_SIZE ? FILE_COPY_BUFFER_SIZE : size - pos;
-                pos += output.transferFrom( input, pos, count );
-            }
-            output.close();
-            output = null;
-            fos.close();
-            fos = null;
-            input.close();
-            input = null;
-            fis.close();
-            fis = null;
-        }
-        finally
-        {
-            IOUtil.close( output );
-            IOUtil.close( fos );
-            IOUtil.close( input );
-            IOUtil.close( fis );
-        }
+        doCopyFileUsingNewIO( source, destination );
     }
 
     private static void doCopyFileUsingNewIO( File source, File destination )
         throws IOException
     {
         NioFiles.copy( source, destination );
+    }
+
+    /**
+     * Link file from destination to source. The directories up to <code>destination</code> will be created if they
+     * don't already exist. <code>destination</code> will be overwritten if it already exists.
+     *
+     * @param source An existing non-directory <code>File</code> to link to.
+     * @param destination A non-directory <code>File</code> becoming the link (possibly overwriting).
+     * @throws IOException if <code>source</code> does not exist, <code>destination</code> cannot be created, or an
+     *             IO error occurs during linking.
+     * @throws java.io.FileNotFoundException if <code>destination</code> is a directory (use
+     *             {@link #copyFileToDirectory}).
+     */
+    public static void linkFile( final File source, final File destination )
+        throws IOException
+    {
+        // check source exists
+        if ( !source.exists() )
+        {
+            final String message = "File " + source + " does not exist";
+            throw new IOException( message );
+        }
+
+        // check source != destination, see PLXUTILS-10
+        if ( source.getCanonicalPath().equals( destination.getCanonicalPath() ) )
+        {
+            // if they are equal, we can exit the method without doing any work
+            return;
+        }
+        mkdirsFor( destination );
+
+        NioFiles.createSymbolicLink( destination, source );
     }
 
     /**
@@ -1211,22 +1157,10 @@ public class FileUtils
         mkdirsFor( destination );
         checkCanWrite( destination );
 
-        InputStream input = null;
-        FileOutputStream output = null;
-        try
+        try (  InputStream input = source.getInputStream();
+               OutputStream output = Files.newOutputStream( destination.toPath() ) )
         {
-            input = source.getInputStream();
-            output = new FileOutputStream( destination );
             IOUtil.copy( input, output );
-            output.close();
-            output = null;
-            input.close();
-            input = null;
-        }
-        finally
-        {
-            IOUtil.close( input );
-            IOUtil.close( output );
         }
     }
 
@@ -1797,7 +1731,7 @@ public class FileUtils
      * @param includes the includes pattern, comma separated
      * @param excludes the excludes pattern, comma separated
      * @return a list of File objects
-     * @throws IOException
+     * @throws IOException io issue
      * @see #getFileNames(File, String, String, boolean)
      */
     public static List<File> getFiles( File directory, String includes, String excludes )
@@ -1814,7 +1748,7 @@ public class FileUtils
      * @param excludes the excludes pattern, comma separated
      * @param includeBasedir true to include the base dir in each file
      * @return a list of File objects
-     * @throws IOException
+     * @throws IOException io issue
      * @see #getFileNames(File, String, String, boolean)
      */
     public static List<File> getFiles( File directory, String includes, String excludes, boolean includeBasedir )
@@ -1840,7 +1774,7 @@ public class FileUtils
      * @param excludes the excludes pattern, comma separated
      * @param includeBasedir true to include the base dir in each String of file
      * @return a list of files as String
-     * @throws IOException
+     * @throws IOException io issue
      */
     public static List<String> getFileNames( File directory, String includes, String excludes, boolean includeBasedir )
         throws IOException
@@ -1857,7 +1791,7 @@ public class FileUtils
      * @param includeBasedir true to include the base dir in each String of file
      * @param isCaseSensitive true if case sensitive
      * @return a list of files as String
-     * @throws IOException
+     * @throws IOException io issue
      */
     public static List<String> getFileNames( File directory, String includes, String excludes, boolean includeBasedir,
                                              boolean isCaseSensitive )
@@ -1874,7 +1808,7 @@ public class FileUtils
      * @param excludes the excludes pattern, comma separated
      * @param includeBasedir true to include the base dir in each String of file
      * @return a list of directories as String
-     * @throws IOException
+     * @throws IOException io issue
      */
     public static List<String> getDirectoryNames( File directory, String includes, String excludes,
                                                   boolean includeBasedir )
@@ -1892,7 +1826,7 @@ public class FileUtils
      * @param includeBasedir true to include the base dir in each String of file
      * @param isCaseSensitive true if case sensitive
      * @return a list of directories as String
-     * @throws IOException
+     * @throws IOException io issue
      */
     public static List<String> getDirectoryNames( File directory, String includes, String excludes,
                                                   boolean includeBasedir, boolean isCaseSensitive )
@@ -1912,7 +1846,7 @@ public class FileUtils
      * @param getFiles true if get files
      * @param getDirectories true if get directories
      * @return a list of files as String
-     * @throws IOException
+     * @throws IOException io issue
      */
     public static List<String> getFileAndDirectoryNames( File directory, String includes, String excludes,
                                                          boolean includeBasedir, boolean isCaseSensitive,
@@ -2322,16 +2256,14 @@ public class FileUtils
             {
                 if ( encoding == null || encoding.length() < 1 )
                 {
-                    fileReader = new BufferedReader( new FileReader( from ) );
-                    fileWriter = new FileWriter( to );
+                    fileReader = Files.newBufferedReader( from.toPath() );
+                    fileWriter = Files.newBufferedWriter( to.toPath() );
                 }
                 else
                 {
-                    FileInputStream instream = new FileInputStream( from );
+                    OutputStream outstream = Files.newOutputStream( to.toPath() );
 
-                    FileOutputStream outstream = new FileOutputStream( to );
-
-                    fileReader = new BufferedReader( new InputStreamReader( instream, encoding ) );
+                    fileReader = Files.newBufferedReader( from.toPath(), Charset.forName( encoding ) );
 
                     fileWriter = new OutputStreamWriter( outstream, encoding );
                 }
@@ -2378,13 +2310,11 @@ public class FileUtils
         throws IOException
     {
         final List<String> lines = new ArrayList<String>();
-        BufferedReader reader = null;
-        try
-        {
-            if ( file.exists() )
-            {
-                reader = new BufferedReader( new FileReader( file ) );
 
+        if ( file.exists() )
+        {
+            try ( BufferedReader reader = Files.newBufferedReader( file.toPath() ) )
+            {
                 for ( String line = reader.readLine(); line != null; line = reader.readLine() )
                 {
                     line = line.trim();
@@ -2394,14 +2324,7 @@ public class FileUtils
                         lines.add( line );
                     }
                 }
-
-                reader.close();
-                reader = null;
             }
-        }
-        finally
-        {
-            IOUtil.close( reader );
         }
 
         return lines;

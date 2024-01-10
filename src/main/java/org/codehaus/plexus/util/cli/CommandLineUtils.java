@@ -29,7 +29,7 @@ import org.codehaus.plexus.util.StringUtils;
 
 /**
  * @author <a href="mailto:trygvis@inamo.no">Trygve Laugst&oslash;l </a>
- * @version $Id$
+ *
  */
 public abstract class CommandLineUtils
 {
@@ -47,6 +47,7 @@ public abstract class CommandLineUtils
 
         private String ls = System.getProperty( "line.separator" );
 
+        @Override
         public void consumeLine( String line )
         {
             string.append( line ).append( ls );
@@ -154,6 +155,7 @@ public abstract class CommandLineUtils
         return new CommandLineCallable()
         {
 
+            @Override
             public Integer call()
                 throws CommandLineException
             {
@@ -498,12 +500,14 @@ public abstract class CommandLineUtils
      * If the argument doesn't include spaces or quotes, return it as is. If it contains double quotes, use single
      * quotes - else surround the argument by double quotes.
      * </p>
-     *
+     * @param argument the argument
+     * @return the transformed command line
      * @throws CommandLineException if the argument contains both, single and double quotes.
      * @deprecated Use {@link StringUtils#quoteAndEscape(String, char, char[], char[], char, boolean)},
      *             {@link StringUtils#quoteAndEscape(String, char, char[], char, boolean)}, or
      *             {@link StringUtils#quoteAndEscape(String, char)} instead.
      */
+    @Deprecated
     @SuppressWarnings( { "JavaDoc", "deprecation" } )
     public static String quote( String argument )
         throws CommandLineException
@@ -519,12 +523,15 @@ public abstract class CommandLineUtils
      * If the argument doesn't include spaces or quotes, return it as is. If it contains double quotes, use single
      * quotes - else surround the argument by double quotes.
      * </p>
-     *
+     * @param argument see name
+     * @param wrapExistingQuotes see name
+     * @return the transformed command line
      * @throws CommandLineException if the argument contains both, single and double quotes.
      * @deprecated Use {@link StringUtils#quoteAndEscape(String, char, char[], char[], char, boolean)},
      *             {@link StringUtils#quoteAndEscape(String, char, char[], char, boolean)}, or
      *             {@link StringUtils#quoteAndEscape(String, char)} instead.
      */
+    @Deprecated
     @SuppressWarnings( { "JavaDoc", "UnusedDeclaration", "deprecation" } )
     public static String quote( String argument, boolean wrapExistingQuotes )
         throws CommandLineException
@@ -533,10 +540,17 @@ public abstract class CommandLineUtils
     }
 
     /**
+     * @param argument the argument
+     * @param escapeSingleQuotes see name
+     * @param escapeDoubleQuotes see name
+     * @param wrapExistingQuotes see name
+     * @return the transformed command line
+     * @throws CommandLineException some trouble
      * @deprecated Use {@link StringUtils#quoteAndEscape(String, char, char[], char[], char, boolean)},
      *             {@link StringUtils#quoteAndEscape(String, char, char[], char, boolean)}, or
      *             {@link StringUtils#quoteAndEscape(String, char)} instead.
      */
+    @Deprecated
     @SuppressWarnings( { "JavaDoc" } )
     public static String quote( String argument, boolean escapeSingleQuotes, boolean escapeDoubleQuotes,
                                 boolean wrapExistingQuotes )

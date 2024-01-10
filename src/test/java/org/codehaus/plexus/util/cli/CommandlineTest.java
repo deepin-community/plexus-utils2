@@ -21,9 +21,10 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.Os;
@@ -34,10 +35,22 @@ import org.codehaus.plexus.util.cli.shell.Shell;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * <p>CommandlineTest class.</p>
+ *
+ * @author herve
+ * @version $Id: $Id
+ * @since 3.4.0
+ */
 public class CommandlineTest
 {
     private String baseDir;
 
+    /**
+     * <p>setUp.</p>
+     *
+     * @throws java.lang.Exception if any.
+     */
     @Before
     public void setUp()
         throws Exception
@@ -50,6 +63,9 @@ public class CommandlineTest
         }
     }
 
+    /**
+     * <p>testCommandlineWithoutCommandInConstructor.</p>
+     */
     @Test
     public void testCommandlineWithoutCommandInConstructor()
     {
@@ -62,6 +78,9 @@ public class CommandlineTest
         assertEquals( "cd .", cmd.toString() );
     }
 
+    /**
+     * <p>testCommandlineWithCommandInConstructor.</p>
+     */
     @Test
     public void testCommandlineWithCommandInConstructor()
     {
@@ -72,6 +91,11 @@ public class CommandlineTest
         assertEquals( "cd .", cmd.toString() );
     }
 
+    /**
+     * <p>testExecuteBinaryOnPath.</p>
+     *
+     * @throws java.lang.Exception if any.
+     */
     @Test
     public void testExecuteBinaryOnPath()
         throws Exception
@@ -89,6 +113,11 @@ public class CommandlineTest
         assertTrue( out.contains( "Java version:" ) );
     }
 
+    /**
+     * <p>testExecute.</p>
+     *
+     * @throws java.lang.Exception if any.
+     */
     @Test
     public void testExecute()
         throws Exception
@@ -104,6 +133,9 @@ public class CommandlineTest
         assertEquals( "Hello", IOUtil.toString( process.getInputStream() ).trim() );
     }
 
+    /**
+     * <p>testSetLine.</p>
+     */
     @Test
     public void testSetLine()
     {
@@ -117,6 +149,9 @@ public class CommandlineTest
         assertEquals( "echo Hello", cmd.toString() );
     }
 
+    /**
+     * <p>testCreateCommandInReverseOrder.</p>
+     */
     @Test
     public void testCreateCommandInReverseOrder()
     {
@@ -129,6 +164,9 @@ public class CommandlineTest
         assertEquals( "cd .", cmd.toString() );
     }
 
+    /**
+     * <p>testSetFile.</p>
+     */
     @Test
     public void testSetFile()
     {
@@ -147,6 +185,11 @@ public class CommandlineTest
         assertEquals( "more " + fileName, cmd.toString() );
     }
 
+    /**
+     * <p>testGetShellCommandLineWindows.</p>
+     *
+     * @throws java.lang.Exception if any.
+     */
     @Test
     public void testGetShellCommandLineWindows()
         throws Exception
@@ -166,6 +209,11 @@ public class CommandlineTest
         assertEquals( expectedShellCmd, shellCommandline[3] );
     }
 
+    /**
+     * <p>testGetShellCommandLineWindowsWithSeveralQuotes.</p>
+     *
+     * @throws java.lang.Exception if any.
+     */
     @Test
     public void testGetShellCommandLineWindowsWithSeveralQuotes()
         throws Exception
@@ -188,8 +236,8 @@ public class CommandlineTest
 
     /**
      * Test the command line generated for the bash shell
-     * 
-     * @throws Exception
+     *
+     * @throws java.lang.Exception
      */
     @Test
     public void testGetShellCommandLineBash()
@@ -215,8 +263,8 @@ public class CommandlineTest
 
     /**
      * Test the command line generated for the bash shell
-     * 
-     * @throws Exception
+     *
+     * @throws java.lang.Exception
      */
     @Test
     public void testGetShellCommandLineBash_WithWorkingDirectory()
@@ -245,8 +293,8 @@ public class CommandlineTest
 
     /**
      * Test the command line generated for the bash shell
-     * 
-     * @throws Exception
+     *
+     * @throws java.lang.Exception
      */
     @Test
     public void testGetShellCommandLineBash_WithSingleQuotedArg()
@@ -270,6 +318,11 @@ public class CommandlineTest
         assertEquals( expectedShellCmd, shellCommandline[2] );
     }
 
+    /**
+     * <p>testGetShellCommandLineNonWindows.</p>
+     *
+     * @throws java.lang.Exception if any.
+     */
     @Test
     public void testGetShellCommandLineNonWindows()
         throws Exception
@@ -294,6 +347,11 @@ public class CommandlineTest
         }
     }
 
+    /**
+     * <p>testEnvironment.</p>
+     *
+     * @throws java.lang.Exception if any.
+     */
     @Test
     public void testEnvironment()
         throws Exception
@@ -303,6 +361,11 @@ public class CommandlineTest
         assertEquals( "name=value", cmd.getEnvironmentVariables()[0] );
     }
 
+    /**
+     * <p>testEnvironmentWitOverrideSystemEnvironment.</p>
+     *
+     * @throws java.lang.Exception if any.
+     */
     @Test
     public void testEnvironmentWitOverrideSystemEnvironment()
         throws Exception
@@ -326,7 +389,7 @@ public class CommandlineTest
     /**
      * Test an executable with a single apostrophe <code>'</code> in its path
      *
-     * @throws Exception
+     * @throws java.lang.Exception
      */
     @Test
     public void testQuotedPathWithSingleApostrophe()
@@ -342,7 +405,7 @@ public class CommandlineTest
     /**
      * Test an executable with shell-expandable content in its path.
      *
-     * @throws Exception
+     * @throws java.lang.Exception
      */
     @Test
     public void testPathWithShellExpansionStrings()
@@ -355,7 +418,7 @@ public class CommandlineTest
     /**
      * Test an executable with a single quotation mark <code>\"</code> in its path only for non Windows box.
      *
-     * @throws Exception
+     * @throws java.lang.Exception
      */
     @Test
     public void testQuotedPathWithQuotationMark()
@@ -378,7 +441,7 @@ public class CommandlineTest
      * Test an executable with a single quotation mark <code>\"</code> and <code>'</code> in its path only for non
      * Windows box.
      *
-     * @throws Exception
+     * @throws java.lang.Exception
      */
     @Test
     public void testQuotedPathWithQuotationMarkAndApostrophe()
@@ -400,7 +463,7 @@ public class CommandlineTest
     /**
      * Test an executable with a quote in its path and no space
      *
-     * @throws Exception
+     * @throws java.lang.Exception
      */
     @Test
     public void testOnlyQuotedPath()
@@ -433,6 +496,11 @@ public class CommandlineTest
         createAndCallScript( dir, javaBinStr + " -version" );
     }
 
+    /**
+     * <p>testDollarSignInArgumentPath.</p>
+     *
+     * @throws java.lang.Exception if any.
+     */
     @Test
     public void testDollarSignInArgumentPath()
         throws Exception
@@ -443,10 +511,10 @@ public class CommandlineTest
             assertTrue( "Can't create dir:" + dir.getAbsolutePath(), dir.mkdirs() );
         }
 
-        FileWriter writer = null;
+        Writer writer = null;
         try
         {
-            writer = new FileWriter( new File( dir, "test$1.txt" ) );
+            writer = Files.newBufferedWriter( dir.toPath().resolve( "test$1.txt" ) );
             IOUtil.copy( "Success", writer );
         }
         finally
@@ -468,6 +536,11 @@ public class CommandlineTest
         executeCommandLine( cmd );
     }
 
+    /**
+     * <p>testTimeOutException.</p>
+     *
+     * @throws java.lang.Exception if any.
+     */
     @Test
     public void testTimeOutException()
         throws Exception
@@ -568,7 +641,7 @@ public class CommandlineTest
             bat = new File( dir, "echo" );
         }
 
-        Writer w = new FileWriter( bat );
+        Writer w = Files.newBufferedWriter( bat.toPath() );
         try
         {
             IOUtil.copy( content, w );
