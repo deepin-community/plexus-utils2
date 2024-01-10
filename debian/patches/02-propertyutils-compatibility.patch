@@ -4,70 +4,50 @@ Author: Emmanuel Bourg <ebourg@apache.org>
 Forwarded: not-needed
 --- a/src/main/java/org/codehaus/plexus/util/PropertyUtils.java
 +++ b/src/main/java/org/codehaus/plexus/util/PropertyUtils.java
-@@ -34,29 +34,44 @@
+@@ -35,19 +35,30 @@
  {
  
      public static Properties loadProperties( final URL url )
 -        throws IOException
      {
-         if ( url == null )
-         {
-             throw new NullPointerException( "url" );
-         }
- 
--        return loadProperties( url.openStream() );
+-        return loadProperties( Objects.requireNonNull( url, "url" ).openStream() );
 +        try
 +        {
-+            return loadProperties( url.openStream() );
++            return loadProperties( Objects.requireNonNull( url, "url" ).openStream() );
 +        }
 +        catch ( IOException e )
 +        {
-+            // ignore
++            throw new RuntimeException(e);
 +        }
-+
-+        return null;
      }
  
      public static Properties loadProperties( final File file )
 -        throws IOException
      {
-         if ( file == null )
-         {
-             throw new NullPointerException( "file" );
-         }
- 
--        return loadProperties( new FileInputStream( file ) );
+-        return loadProperties( Files.newInputStream( Objects.requireNonNull( file, "file" ).toPath() ) );
 +        try
 +        {
-+            return loadProperties( new FileInputStream( file ) );
++            return loadProperties( Files.newInputStream( Objects.requireNonNull( file, "file" ).toPath() ) );
 +        }
 +        catch ( IOException e )
 +        {
-+            // ignore
++            throw new RuntimeException(e);
 +        }
-+
-+        return null;
      }
  
      public static Properties loadProperties( final InputStream is )
 -        throws IOException
      {
-         InputStream in = is;
-         try
-@@ -73,10 +88,16 @@
- 
-             return properties;
+         final Properties properties = new Properties();
+         
+@@ -58,6 +69,10 @@
+             {
+                 properties.load( in );
+             }
++            catch ( IOException e )
++            {
++                throw new RuntimeException(e);
++            }
          }
-+        catch ( IOException e )
-+        {
-+            // ignore
-+        }
-         finally
-         {
-             IOUtil.close( in );
-         }
-+
-+        return null;
-     }
  
- }
+         return properties;

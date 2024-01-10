@@ -22,11 +22,11 @@ limitations under the License.
   <parent>
     <groupId>org.codehaus.plexus</groupId>
     <artifactId>plexus</artifactId>
-    <version>5.1</version>
+    <version>8</version>
   </parent>
 
   <artifactId>plexus-utils</artifactId>
-  <version>3.3.0</version>
+  <version>3.4.2</version>
 
   <name>Plexus Common Utilities</name>
   <description>A collection of various utility classes to ease working with strings, files, command lines, XML and
@@ -37,7 +37,7 @@ limitations under the License.
     <connection>scm:git:git@github.com:codehaus-plexus/plexus-utils.git</connection>
     <developerConnection>scm:git:git@github.com:codehaus-plexus/plexus-utils.git</developerConnection>
     <url>http://github.com/codehaus-plexus/plexus-utils</url>
-    <tag>plexus-utils-3.3.0</tag>
+    <tag>plexus-utils-3.4.2</tag>
   </scm>
   <issueManagement>
     <system>github</system>
@@ -50,23 +50,33 @@ limitations under the License.
     </site>
   </distributionManagement>
 
+  <properties>
+    <project.build.outputTimestamp>2022-05-17T20:30:09Z</project.build.outputTimestamp>
+  </properties>
+
   <dependencies>
-      <dependency>
-        <groupId>org.apache.maven.shared</groupId>
-        <artifactId>maven-plugin-testing-harness</artifactId>
-        <version>1.1</version>
-        <scope>test</scope>
-      </dependency>
+    <dependency>
+      <groupId>org.apache.maven.shared</groupId>
+      <artifactId>maven-plugin-testing-harness</artifactId>
+      <version>1.1</version>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>org.openjdk.jmh</groupId>
       <artifactId>jmh-core</artifactId>
-      <version>1.21</version>
+      <version>1.35</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.openjdk.jmh</groupId>
       <artifactId>jmh-generator-annprocess</artifactId>
-      <version>1.21</version>
+      <version>1.35</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.13.2</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -76,12 +86,32 @@ limitations under the License.
       <plugins>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-javadoc-plugin</artifactId>
-          <version>3.0.0</version>
+          <artifactId>maven-resources-plugin</artifactId>
+          <!--
+          maven totally change his way to copy symlink
+          this mean the symlink is copied as a symlink and not anymore as a new file
+          https://issues.apache.org/jira/browse/MRESOURCES-237
+          -->
+          <version>2.7</version>
         </plugin>
       </plugins>
     </pluginManagement>
     <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>default-compile</id>
+            <goals>
+              <goal>compile</goal>
+            </goals>
+            <configuration>
+              <source>1.8</source>
+              <target>1.8</target>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-scm-publish-plugin</artifactId>
@@ -121,40 +151,103 @@ limitations under the License.
         </configuration>
       </plugin>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-enforcer-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>enforce-java</id>
-            <goals>
-              <goal>enforce</goal>
-            </goals>
-            <configuration>
-              <rules>
-                <requireJavaVersion>
-                  <version>1.7.0</version>
-                </requireJavaVersion>
-              </rules>
-            </configuration>
-          </execution>
-        </executions>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <archive>
+            <manifestEntries>
+              <Multi-Release>true</Multi-Release>
+            </manifestEntries>
+          </archive>
+        </configuration>
       </plugin>
     </plugins>
   </build>
 
   <profiles>
     <profile>
-      <!-- See https://github.com/codehaus-plexus/plexus-utils/pull/27 -->
-      <!-- m2e Eclipse plugin doesn't respect the maven-enforcer-plugin 'requireJavaVersion' parameter  -->
-      <id>eclipse-only-jdk-version</id>
+      <id>jdk9+</id>
       <activation>
-        <property>
-          <name>m2e.version</name>
-        </property>
+        <jdk>[9,)</jdk>
       </activation>
-      <properties>
-        <javaVersion>7</javaVersion>
-      </properties>
+      <build>
+        <pluginManagement>
+          <plugins>
+            <plugin>
+              <artifactId>maven-compiler-plugin</artifactId>
+              <executions>
+                <execution>
+                  <id>compile-java-9</id>
+                  <goals>
+                    <goal>compile</goal>
+                  </goals>
+                  <configuration>
+                    <release>9</release>
+                    <compileSourceRoots>
+                      <compileSourceRoot>${project.basedir}/src/main/java9</compileSourceRoot>
+                  </compileSourceRoots>
+                  <multiReleaseOutput>true</multiReleaseOutput>
+                  </configuration>
+                </execution>
+              </executions>
+            </plugin>
+          </plugins>
+        </pluginManagement>
+      </build>
+    </profile>
+    <profile>
+      <id>jdk10+</id>
+      <activation>
+        <jdk>[10,)</jdk>
+      </activation>
+      <build>
+        <pluginManagement>
+          <plugins>
+            <plugin>
+              <artifactId>maven-compiler-plugin</artifactId>
+              <executions>
+                <execution>
+                  <id>compile-java-10</id>
+                  <goals>
+                    <goal>compile</goal>
+                  </goals>
+                  <configuration>
+                    <release>10</release>
+                    <compileSourceRoots>
+                      <compileSourceRoot>${project.basedir}/src/main/java10</compileSourceRoot>
+                  </compileSourceRoots>
+                  <multiReleaseOutput>true</multiReleaseOutput>
+                  </configuration>
+                </execution>
+              </executions>
+            </plugin>
+          </plugins>
+        </pluginManagement>
+      </build>
+    </profile>
+    <profile>
+      <id>plexus-release</id>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-enforcer-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>enforce-java</id>
+                <goals>
+                  <goal>enforce</goal>
+                </goals>
+                <configuration>
+                  <rules>
+                    <requireJavaVersion>
+                      <version>11</version>
+                    </requireJavaVersion>
+                  </rules>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
     </profile>
   </profiles>
 </project>

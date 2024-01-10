@@ -23,27 +23,31 @@ import java.io.OutputStream;
  * Wraps a String as an OutputStream.
  *
  * @author <a href="mailto:evenisse@codehaus.org">Emmanuel Venisse</a>
- * @version $Id$
+ *
  * @deprecated As of version 1.5.2 this class should no longer be used because it does not properly handle character
  *             encoding. Instead, use {@link java.io.ByteArrayOutputStream#toString(String)}.
  */
+@Deprecated
 public class StringOutputStream
     extends OutputStream
 {
     private StringBuffer buf = new StringBuffer();
 
+    @Override
     public void write( byte[] b )
         throws IOException
     {
         buf.append( new String( b ) );
     }
 
+    @Override
     public void write( byte[] b, int off, int len )
         throws IOException
     {
         buf.append( new String( b, off, len ) );
     }
 
+    @Override
     public void write( int b )
         throws IOException
     {
@@ -52,6 +56,7 @@ public class StringOutputStream
         buf.append( new String( bytes ) );
     }
 
+    @Override
     public String toString()
     {
         return buf.toString();

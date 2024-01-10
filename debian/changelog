@@ -1,3 +1,34 @@
+plexus-utils2 (3.4.2-1) unstable; urgency=medium
+
+  * Team upload.
+  * New upstream release
+    - Refreshed the patches
+  * Standards-Version updated to 4.6.1
+
+ -- Emmanuel Bourg <ebourg@apache.org>  Mon, 05 Dec 2022 20:04:28 +0100
+
+plexus-utils2 (3.3.1-1) unstable; urgency=medium
+
+  * Team upload.
+  * New upstream release
+
+ -- Emmanuel Bourg <ebourg@apache.org>  Tue, 27 Sep 2022 13:59:04 +0200
+
+plexus-utils2 (3.3.0-3) unstable; urgency=medium
+
+  * Team upload.
+  * Work around maven-resources-plugin bug to avoid a FTBFS and remove the test
+    symlinks for now. (Closes: #1013478)
+
+ -- Markus Koschany <apo@debian.org>  Wed, 29 Jun 2022 20:00:11 +0200
+
+plexus-utils2 (3.3.0-2) unstable; urgency=medium
+
+  * Team upload.
+  * Fixed the build failure with OpenJDK 17 (Closes: #1011592)
+
+ -- Emmanuel Bourg <ebourg@apache.org>  Fri, 27 May 2022 16:02:10 +0200
+
 plexus-utils2 (3.3.0-1) unstable; urgency=medium
 
   * Team upload.

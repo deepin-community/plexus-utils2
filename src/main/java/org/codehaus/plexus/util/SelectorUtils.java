@@ -69,7 +69,7 @@ import java.util.StringTokenizer;
  * @author Arnout J. Kuiper <a href="mailto:ajkuiper@wxs.nl">ajkuiper@wxs.nl</a>
  * @author Magesh Umasankar
  * @author <a href="mailto:bruce@callenish.com">Bruce Atherton</a>
- * @version $Id$
+ *
  * @since 1.5
  */
 public final class SelectorUtils
@@ -93,7 +93,7 @@ public final class SelectorUtils
     }
 
     /**
-     * Retrieves the manager of the Singleton.
+     * @return Retrieves the manager of the Singleton.
      */
     public static SelectorUtils getInstance()
     {
@@ -253,21 +253,32 @@ public final class SelectorUtils
     {
         if ( isRegexPrefixedPattern( pattern ) )
         {
-            pattern =
+            String localPattern =
                 pattern.substring( REGEX_HANDLER_PREFIX.length(), pattern.length() - PATTERN_HANDLER_SUFFIX.length() );
 
-            return str.matches( pattern );
+            return str.matches( localPattern );
         }
         else
         {
-            if ( isAntPrefixedPattern( pattern ) )
-            {
-                pattern = pattern.substring( ANT_HANDLER_PREFIX.length(),
-                                             pattern.length() - PATTERN_HANDLER_SUFFIX.length() );
-            }
-
-            return matchAntPathPattern( pattern, str, separator, isCaseSensitive );
+            String localPattern = isAntPrefixedPattern( pattern )
+                ? pattern.substring( ANT_HANDLER_PREFIX.length(), pattern.length() - PATTERN_HANDLER_SUFFIX.length() )
+                : pattern;
+            final String osRelatedPath = toOSRelatedPath( str, separator );
+            final String osRelatedPattern = toOSRelatedPath( localPattern, separator );
+            return matchAntPathPattern( osRelatedPattern, osRelatedPath, separator, isCaseSensitive );
         }
+    }
+
+    private static String toOSRelatedPath( String pattern, String separator )
+    {
+        if ( "/".equals( separator ) )
+        {
+            return pattern.replace( "\\", separator );
+        }
+        if ( "\\".equals( separator ) ) {
+            return pattern.replace( "/", separator );
+        }
+        return pattern;
     }
 
     static boolean isRegexPrefixedPattern( String pattern )
@@ -772,7 +783,7 @@ public final class SelectorUtils
         {
             ret.add( st.nextToken() );
         }
-        return ret.toArray( new String[ret.size()] );
+        return ret.toArray( new String[0] );
     }
 
     /**

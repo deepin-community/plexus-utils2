@@ -21,14 +21,13 @@ import static org.junit.Assert.assertTrue;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.nio.file.Files;
 import java.util.Arrays;
 
 import junit.framework.AssertionFailedError;
@@ -37,11 +36,18 @@ import junit.framework.AssertionFailedError;
  * Base class for testcases doing tests with files.
  *
  * @author Jeremias Maerki
+ * @version $Id: $Id
+ * @since 3.4.0
  */
 public abstract class FileBasedTestCase
 {
     private static File testDir;
 
+    /**
+     * <p>getTestDirectory.</p>
+     *
+     * @return a {@link java.io.File} object.
+     */
     public static File getTestDirectory()
     {
         if ( testDir == null )
@@ -51,6 +57,14 @@ public abstract class FileBasedTestCase
         return testDir;
     }
 
+    /**
+     * <p>createFile.</p>
+     *
+     * @param file a {@link java.io.File} object.
+     * @param size a long.
+     * @return an array of {@link byte} objects.
+     * @throws java.io.IOException if any.
+     */
     protected byte[] createFile( final File file, final long size )
         throws IOException
     {
@@ -61,7 +75,7 @@ public abstract class FileBasedTestCase
 
         byte[] data = generateTestData( size );
 
-        final BufferedOutputStream output = new BufferedOutputStream( new FileOutputStream( file ) );
+        final BufferedOutputStream output = new BufferedOutputStream( Files.newOutputStream( file.toPath() ) );
 
         try
         {
@@ -75,6 +89,13 @@ public abstract class FileBasedTestCase
         }
     }
 
+    /**
+     * <p>createSymlink.</p>
+     *
+     * @param link a {@link java.io.File} object.
+     * @param target a {@link java.io.File} object.
+     * @return a boolean.
+     */
     protected boolean createSymlink( final File link, final File target )
     {
         try
@@ -95,6 +116,12 @@ public abstract class FileBasedTestCase
         return true;
     }
 
+    /**
+     * <p>generateTestData.</p>
+     *
+     * @param size a long.
+     * @return an array of {@link byte} objects.
+     */
     protected byte[] generateTestData( final long size )
     {
         try
@@ -109,6 +136,13 @@ public abstract class FileBasedTestCase
         }
     }
 
+    /**
+     * <p>generateTestData.</p>
+     *
+     * @param out a {@link java.io.OutputStream} object.
+     * @param size a long.
+     * @throws java.io.IOException if any.
+     */
     protected void generateTestData( final OutputStream out, final long size )
         throws IOException
     {
@@ -121,6 +155,13 @@ public abstract class FileBasedTestCase
         }
     }
 
+    /**
+     * <p>newFile.</p>
+     *
+     * @param filename a {@link java.lang.String} object.
+     * @return a {@link java.io.File} object.
+     * @throws java.io.IOException if any.
+     */
     protected File newFile( String filename )
         throws IOException
     {
@@ -135,6 +176,13 @@ public abstract class FileBasedTestCase
         return destination;
     }
 
+    /**
+     * <p>checkFile.</p>
+     *
+     * @param file a {@link java.io.File} object.
+     * @param referenceFile a {@link java.io.File} object.
+     * @throws java.lang.Exception if any.
+     */
     protected void checkFile( final File file, final File referenceFile )
         throws Exception
     {
@@ -142,6 +190,12 @@ public abstract class FileBasedTestCase
         assertEqualContent( referenceFile, file );
     }
 
+    /**
+     * <p>checkWrite.</p>
+     *
+     * @param output a {@link java.io.OutputStream} object.
+     * @throws java.lang.Exception if any.
+     */
     protected void checkWrite( final OutputStream output )
         throws Exception
     {
@@ -156,6 +210,12 @@ public abstract class FileBasedTestCase
         }
     }
 
+    /**
+     * <p>checkWrite.</p>
+     *
+     * @param output a {@link java.io.Writer} object.
+     * @throws java.lang.Exception if any.
+     */
     protected void checkWrite( final Writer output )
         throws Exception
     {
@@ -170,6 +230,12 @@ public abstract class FileBasedTestCase
         }
     }
 
+    /**
+     * <p>deleteFile.</p>
+     *
+     * @param file a {@link java.io.File} object.
+     * @throws java.lang.Exception if any.
+     */
     protected void deleteFile( final File file )
         throws Exception
     {
@@ -192,10 +258,10 @@ public abstract class FileBasedTestCase
          * + " and " + f1 + " have differing file sizes (" + f0.length() + " vs " + f1.length() + ")", ( f0.length() ==
          * f1.length() ) );
          */
-        final InputStream is0 = new FileInputStream( f0 );
+        final InputStream is0 = Files.newInputStream( f0.toPath() );
         try
         {
-            final InputStream is1 = new FileInputStream( f1 );
+            final InputStream is1 = Files.newInputStream( f1.toPath() );
             try
             {
                 final byte[] buf0 = new byte[1024];
@@ -225,11 +291,17 @@ public abstract class FileBasedTestCase
         }
     }
 
-    /** Assert that the content of a file is equal to that in a byte[]. */
+    /**
+     * Assert that the content of a file is equal to that in a byte[].
+     *
+     * @param b0 an array of {@link byte} objects.
+     * @param file a {@link java.io.File} object.
+     * @throws java.io.IOException if any.
+     */
     protected void assertEqualContent( final byte[] b0, final File file )
         throws IOException
     {
-        final InputStream is = new FileInputStream( file );
+        final InputStream is = Files.newInputStream( file.toPath() );
         try
         {
             byte[] b1 = new byte[b0.length];
@@ -245,6 +317,11 @@ public abstract class FileBasedTestCase
         }
     }
 
+    /**
+     * <p>assertIsDirectory.</p>
+     *
+     * @param file a {@link java.io.File} object.
+     */
     protected void assertIsDirectory( File file )
     {
         assertTrue( "The File doesn't exists: " + file.getAbsolutePath(), file.exists() );
@@ -252,6 +329,11 @@ public abstract class FileBasedTestCase
         assertTrue( "The File isn't a directory: " + file.getAbsolutePath(), file.isDirectory() );
     }
 
+    /**
+     * <p>assertIsFile.</p>
+     *
+     * @param file a {@link java.io.File} object.
+     */
     protected void assertIsFile( File file )
     {
         assertTrue( "The File doesn't exists: " + file.getAbsolutePath(), file.exists() );

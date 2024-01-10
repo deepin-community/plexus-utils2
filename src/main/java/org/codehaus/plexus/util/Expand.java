@@ -55,11 +55,11 @@ package org.codehaus.plexus.util;
  */
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
 import java.util.Date;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -71,7 +71,7 @@ import java.util.zip.ZipInputStream;
  * @author <a href="mailto:stefan.bodewig@epost.de">Stefan Bodewig</a>
  * @author <a href="mailto:umagesh@codehaus.org">Magesh Umasankar</a>
  * @since Ant 1.1 @ant.task category="packaging" name="unzip" name="unjar" name="unwar"
- * @version $Id$
+ *
  */
 public class Expand
 {
@@ -93,43 +93,23 @@ public class Expand
         expandFile( source, dest );
     }
 
-    /*
-     * This method is to be overridden by extending unarchival tasks.
-     */
-    /**
-     * Description of the Method
-     */
     protected void expandFile( final File srcF, final File dir )
         throws Exception
     {
-        ZipInputStream zis = null;
-        try
+        // code from WarExpand
+        try ( ZipInputStream zis = new ZipInputStream( Files.newInputStream( srcF.toPath() ) ) )
         {
-            // code from WarExpand
-            zis = new ZipInputStream( new FileInputStream( srcF ) );
-
             for ( ZipEntry ze = zis.getNextEntry(); ze != null; ze = zis.getNextEntry() )
             {
                 extractFile( srcF, dir, zis, ze.getName(), new Date( ze.getTime() ), ze.isDirectory() );
             }
-
-            // log("expand complete", Project.MSG_VERBOSE);
-            zis.close();
-            zis = null;
         }
         catch ( IOException ioe )
         {
             throw new Exception( "Error while expanding " + srcF.getPath(), ioe );
         }
-        finally
-        {
-            IOUtil.close( zis );
-        }
     }
 
-    /**
-     * Description of the Method
-     */
     protected void extractFile( File srcF, File dir, InputStream compressedInputStream, String entryName,
                                 Date entryDate, boolean isDirectory )
         throws Exception
@@ -159,22 +139,13 @@ public class Expand
             else
             {
                 byte[] buffer = new byte[65536];
-                FileOutputStream fos = null;
-                try
+                
+                try ( OutputStream fos = Files.newOutputStream( f.toPath() ) )
                 {
-                    fos = new FileOutputStream( f );
-
-                    for ( int length =
-                        compressedInputStream.read( buffer ); length >= 0; fos.write( buffer, 0, length ), length =
-                            compressedInputStream.read( buffer ) )
+                    for ( int length = compressedInputStream.read( buffer ); 
+                          length >= 0; 
+                          fos.write( buffer, 0, length ), length = compressedInputStream.read( buffer ) )
                         ;
-
-                    fos.close();
-                    fos = null;
-                }
-                finally
-                {
-                    IOUtil.close( fos );
                 }
             }
 
@@ -208,7 +179,7 @@ public class Expand
     }
 
     /**
-     * Should we overwrite files in dest, even if they are newer than the corresponding entries in the archive?
+     * @param b Should we overwrite files in dest, even if they are newer than the corresponding entries in the archive?
      */
     public void setOverwrite( boolean b )
     {

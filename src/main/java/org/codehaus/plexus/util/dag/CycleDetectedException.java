@@ -37,9 +37,6 @@ public class CycleDetectedException
         return cycle;
     }
 
-    /**
-     * @return
-     */
     public String cycleToString()
     {
         final StringBuilder buffer = new StringBuilder();
@@ -56,6 +53,7 @@ public class CycleDetectedException
         return buffer.toString();
     }
 
+    @Override
     public String getMessage()
     {
         return super.getMessage() + " " + cycleToString();

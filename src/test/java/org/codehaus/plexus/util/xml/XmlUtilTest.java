@@ -20,14 +20,13 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.nio.file.Files;
 
 import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.ReaderFactory;
@@ -36,15 +35,21 @@ import org.codehaus.plexus.util.WriterFactory;
 import org.junit.Test;
 
 /**
- * Test the {@link XmlUtil} class.
+ * Test the {@link org.codehaus.plexus.util.xml.XmlUtil} class.
  *
  * @author <a href="mailto:vincent.siveton@gmail.com">Vincent Siveton</a>
- * @version $Id$
+ * @version $Id: $Id
+ * @since 3.4.0
  */
 public class XmlUtilTest
 {
     private String basedir;
 
+    /**
+     * <p>Getter for the field <code>basedir</code>.</p>
+     *
+     * @return a {@link java.lang.String} object.
+     */
     public final String getBasedir()
     {
         if ( null == basedir )
@@ -66,6 +71,11 @@ public class XmlUtilTest
         return file;
     }
 
+    /**
+     * <p>testPrettyFormatInputStreamOutputStream.</p>
+     *
+     * @throws java.lang.Exception if any.
+     */
     @Test
     public void testPrettyFormatInputStreamOutputStream()
         throws Exception
@@ -77,8 +87,8 @@ public class XmlUtilTest
         OutputStream os = null;
         try
         {
-            is = new FileInputStream( testDocument );
-            os = new FileOutputStream( getTestOutputFile( "target/test/prettyFormatTestDocumentOutputStream.xml" ) );
+            is = Files.newInputStream( testDocument.toPath() );
+            os = Files.newOutputStream( getTestOutputFile( "target/test/prettyFormatTestDocumentOutputStream.xml" ).toPath() );
 
             assertNotNull( is );
             assertNotNull( os );
@@ -92,6 +102,11 @@ public class XmlUtilTest
         }
     }
 
+    /**
+     * <p>testPrettyFormatReaderWriter.</p>
+     *
+     * @throws java.lang.Exception if any.
+     */
     @Test
     public void testPrettyFormatReaderWriter()
         throws Exception
@@ -119,6 +134,11 @@ public class XmlUtilTest
         }
     }
 
+    /**
+     * <p>testPrettyFormatString.</p>
+     *
+     * @throws java.lang.Exception if any.
+     */
     @Test
     public void testPrettyFormatString()
         throws Exception
@@ -150,6 +170,11 @@ public class XmlUtilTest
         assertTrue( countEOL < StringUtils.countMatches( writer.toString(), XmlUtil.DEFAULT_LINE_SEPARATOR ) );
     }
 
+    /**
+     * <p>testPrettyFormatReaderWriter2.</p>
+     *
+     * @throws java.lang.Exception if any.
+     */
     @Test
     public void testPrettyFormatReaderWriter2()
         throws Exception

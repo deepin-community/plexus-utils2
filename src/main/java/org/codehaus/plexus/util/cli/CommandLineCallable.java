@@ -26,6 +26,7 @@ import java.util.concurrent.Callable;
 public interface CommandLineCallable
     extends Callable<Integer>
 {
-    public Integer call()
+    @Override
+    Integer call()
         throws CommandLineException;
 }

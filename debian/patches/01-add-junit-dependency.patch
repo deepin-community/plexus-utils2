@@ -3,8 +3,8 @@ Author: Emmanuel Bourg <ebourg@apache.org>
 Forwarded: not-needed
 --- a/pom.xml
 +++ b/pom.xml
-@@ -69,6 +69,12 @@
-       <version>1.21</version>
+@@ -79,6 +79,12 @@
+       <version>4.13.2</version>
        <scope>test</scope>
      </dependency>
 +    <dependency>

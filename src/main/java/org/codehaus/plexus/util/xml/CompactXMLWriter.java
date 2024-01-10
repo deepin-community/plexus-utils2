@@ -20,7 +20,7 @@ import java.io.PrintWriter;
 import java.io.Writer;
 
 /**
- * @version $Id$
+ *
  */
 public class CompactXMLWriter
     extends PrettyPrintXMLWriter
@@ -36,6 +36,7 @@ public class CompactXMLWriter
         super( writer );
     }
 
+    @Override
     protected void endOfLine()
     {
         // override parent: don't write anything at end of line
