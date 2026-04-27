@@ -1,0 +1,38 @@
+Description: Fix CVE-2025-67030: Directory Traversal vulnerability
+ Fix Zip Slip vulnerability in archive extraction by using getCanonicalPath()
+ instead of getAbsolutePath() for path validation.
+Author: Copilot <198982749+Copilot@users.noreply.github.com>
+Origin: upstream, https://github.com/codehaus-plexus/plexus-utils/commit/36ea3526309d2842075bf018d45152816a37fc98
+Bug: https://security-tracker.debian.org/tracker/CVE-2025-67030
+Forwarded: not-needed
+
+Index: github-plexus-utils2-67030/src/main/java/org/codehaus/plexus/util/Expand.java
+===================================================================
+--- github-plexus-utils2-67030.orig/src/main/java/org/codehaus/plexus/util/Expand.java
++++ github-plexus-utils2-67030/src/main/java/org/codehaus/plexus/util/Expand.java
+@@ -116,9 +116,23 @@ public class Expand
+     {
+         File f = FileUtils.resolveFile( dir, entryName );
+ 
+-        if ( !f.getAbsolutePath().startsWith( dir.getAbsolutePath() ) )
++        try
++        {
++            String canonicalDirPath = dir.getCanonicalPath();
++            String canonicalFilePath = f.getCanonicalPath();
++
++            // Ensure the file is within the target directory
++            // We need to check that the canonical file path starts with the canonical directory path
++            // followed by a file separator to prevent path traversal attacks
++            if ( !canonicalFilePath.startsWith( canonicalDirPath + File.separator )
++                    && !canonicalFilePath.equals( canonicalDirPath ) )
++            {
++                throw new IOException( "Entry '" + entryName + "' outside the target directory." );
++            }
++        }
++        catch ( IOException e )
+         {
+-            throw new IOException( "Entry '" + entryName + "' outside the target directory." );
++            throw new IOException( "Failed to verify entry path for '" + entryName + "'", e );
+         }
+ 
+         try
